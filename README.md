@@ -7,7 +7,6 @@
 - [variables](#variables)
 - [partials](#partials)
 - [mixins](#mixins)
-- [imports](#imports)
 - [media queries](#media-queries)
 - [operators](#operators)
 - [functions](#functions)
@@ -69,6 +68,7 @@ style.scss
 @mixin border-radius($radius) {
 	border-radius: $radius;
 }
+
 //Usage
 .button {
 	@include border-radius(10px);
@@ -86,52 +86,142 @@ Sass will duplicate the output of the mixin and in this case the stylesheet will
 ```CSS
 //Mixin declaration
 @mixin vertical-align {
-	position: absolute;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%); 
 }
 
 //Mixin usage
 .homepage-intro {
-	@include vertical-align;
+    @include vertical-align;
 }
 
 .homepage-gallery {
-	@include vertical-align;
+    @include vertical-align;
 }
 
 //Output
 .homepage-intro {
-	position: absolute;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
 }
 
 .homepage-gallery {
-	position: absolute;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
 }
 
 //Placeholder declaration
 %vertical-align {
-	position: absolute;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%); 
 }
 
 //Placeholder usage
 .homepage-intro {
-	@extend vertical-align;
+    @extend vertical-align;
 }
 
 .homepage-gallery {
-	@extend vertical-align;
+    @extend vertical-align;
 }
 
 //Output
 .homepage-intro, homepage-gallery {
-	position: absolute;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
 }
+```
+
+#Media queries
+As we know Sass allows variables to be interpolated. This means that we can move our media queries into variables and reuse them.
+```CSS
+$break-small: 320px;
+
+p {
+    font-size: 16px;
+
+    @media screen and (max-width: $break-small) {
+        font-size: 18px;
+    }
+}
+```
+
+To write code in a modular way we can use mixins, to group the style that we want to reuse it wherever we want, in this way:
+```CSS
+//Declaration
+$break-small-portrait: 320px;
+$break-medium-portrait: 480px;
+$break-small-landscape: 750px;
+$break-medium: 1024px;
+$break-large: 1124px;
+
+@mixin respond-to($media) {
+    @if $media == small-phones {
+        @media only screen and (min-width: $break-small-portrait) { @content; }
+    }
+
+    @if $media == medium-phones {
+        @media only screen and (min-width: $break-medium-portrait) and (max-width: $break-small-landscape) { @content; }
+    }
+
+    @if $media == phones {
+        @media only screen and (min-width: $break-small-portrait) and (max-width: $break-small-landscape) { @content; }
+    }
+
+    @else if $media == tablets {
+        @media only screen and (min-width: $break-small-landscape + 1) and (max-width: $break-medium - 1) { @content; }
+    }
+
+    @else if $media == tablets-landscape {
+        @media only screen and (min-width: $break-small-landscape + 1) and (max-width: $break-medium) and (orientation: landscape) { @content; }
+    }
+
+    @else if $media == phones-tablets {
+        @media only screen and (min-width: $break-small-portrait) and (max-width: $break-medium - 1) { @content; }
+    }
+
+    @else if $media == wide-screens {
+        @media only screen and (min-width: $break-large) { @content; }
+    }
+}
+
+//Usage
+p {
+    font-size: 16px;
+    @include respond-to(phones) {
+        font-size: 18px;
+    }
+}
+```
+
+###Issues
+There are several small issues related to this directive. For example  @extend doesn't behave properly inside @media.
+```CSS
+.red {
+    color: red;
+}
+  
+@media only screen and (max-width : 320px) {
+    .blue {
+        @extend .red;
+	    margin: 10px;
+    }
+}
+```
+we will get 
+```CCC
+.red, .blue {
+    color: red;
+}
+
+@media only screen and (max-width: 320px) {
+    .blue {
+        margin: 10px;
+    }
+}
+```
