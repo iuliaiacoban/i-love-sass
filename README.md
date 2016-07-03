@@ -225,3 +225,121 @@ we will get
     }
 }
 ```
+
+#Operators
+As in javascript we can do different operations in sass. Below are defined the operators that Sass supports: 
+###a. Arithmetic
+- used to perform arithmetic operations
+- operators: +, -, *, /, &, % 
+```CSS
+h1 {
+    font-size: 5px + 2em;    // error incompatible units
+    font-size: 5px + 2;      // 7px
+    font-size: 5px * 2px;    // 10px*px => invalid CSS
+    font-size: 16px / 24px   // Outputs as CSS but
+    font-size: (16px / 24px) // if you use parentheses, it will do a division operation
+}
+```
+
+Other examples:
+```CSS
+#333 + #777 		// #aaaaaa
+#090807 - ##030201      // #060606
+#222 * #040404 		// #888
+(222 => [22][22][22] * [04][04][04] => [8][8][8] => 888888) [r][g][b]
+```
+```CSS
+Double ampersand:
+.button {
+	& + & { }    //Output: .button + .button { }
+}
+```
+This slector will match any .button class that immediately follows another .buttons class. The trick can be used when we want to set a margin/padding to a group of buttons and we don't want to use :first-child and :last-child.
+ 
+###b. Assignment :
+- used for declaring variables
+```CSS
+$main-color: lightgray;
+```
+
+###c. Equality ==, !=
+- used in conditional statements to test wheter 2 values are the same or not
+- Sass doesn't support ===. In Sass ("5" == 5) returns false but in JS it will return true
+
+```CSS
+@mixin font-fl($font) {
+    &:after {
+        @if(type-of($font) == string) {
+            content: 'My font is: #{$font}.';
+        } @else {
+            content: 'Sorry, the argument #{$font} is a #{type-of($font)}.';
+        }
+    }
+}
+
+h2{
+    @include font-fl(sans-serif);
+}
+```
+Output:
+```CSS
+h2:after {
+    content: 'My font is: sans-serif.';
+}
+```
+
+###d. Comparison
+```CSS	
+$padding: 50px;
+
+h2 {
+    @if($padding <= 20px) {
+        padding: $padding;
+    } @else {
+        padding: $padding / 2;
+    }
+}
+```
+Output:
+```CSS
+h2 {
+    padding: 25px;
+}
+```
+
+###e. Logical operators: and, or, not
+- used to test multiple conditions within a conditional expression
+
+```CSS
+$list-map: (success: lightgreen, alert: tomato, info: lightblue);
+
+@mixin button-state($btn-state) {
+    @if (length($list-map) > 2 or length($list-map) < 5) {
+        background-color: map-get($list-map, $btn-state);
+    }
+}
+
+.btn {
+    @include button-state(success);
+}
+```
+
+#Functions
+###a. Built-in functions
+A full list with all functions can be found here: http://sass-lang.com/documentation/Sass/Script/Functions.html
+```CSS
+p {
+  color: hsl(0, 100%, 50%); //color: #ff0000
+  border-bottom: 1px solid opacify(#fefefe, .5);
+}
+```
+###b. Custom functions
+- @function and @return directives
+
+```CSS
+@function em($pixels, $context: 16px) {
+    @return ($pixels / $context) * 1em;
+}
+
+font-size: em(18px); // fonst-zize: 1.125em;
+```
